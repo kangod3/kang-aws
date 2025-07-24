@@ -69,13 +69,21 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+variable "key_name" {
+  type = string
+}
+
+provider "aws" {
+  region = "ap-northeast-2"
+}
+
 resource "aws_instance" "monitoring_ec2" {
   ami                         = "ami-0c9c942bd7bf113a2"  # Ubuntu 22.04 (서울 리전)
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.allow_ssh.id]
   associate_public_ip_address = true
-  key_name                    = "kangod"  # 🔑 반드시 키페어 이름 변경
+  key_name                    = var.key_name  # 🔑 반드시 키페어 이름 변경
 
   tags = {
     Name = "monitoring-ec2"
