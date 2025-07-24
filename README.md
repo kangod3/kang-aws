@@ -1,69 +1,69 @@
-# influx-cli
+BPF 도어 이상행위 탐지 시스템
+Linux 시스템의 실행 명령어를 실시간으로 감시하고, 머신러닝을 통해 비정상 행위를 탐지하여 InfluxDB 및 Grafana를 통해 시각화하는 이상행위 탐지 시스템
 
-CLI for managing resources in InfluxDB v2
+프로젝트 개요
 
-## Motivation
+auditd를 통해 시스템 실행 로그를 수집
 
-This repository decouples the `influx` CLI from the OSS `influxdb` codebase. Our goals are to:
-1. Make it easier to keep the CLI up-to-date with InfluxDB Cloud API changes
-2. Enable faster turn-around on fixes/features that only affect the CLI
-3. Allow the CLI to be built & released for a wider range of platforms than the server can support
+머신러닝 모델을 활용해 명령어의 정상/비정상 여부 분류
 
-## Building the CLI
+탐지 결과를 InfluxDB에 기록
 
-Follow these steps to build the CLI. If you're updating your CLI build, see *Updating openapi* below.
-1. Clone this repo (influx-cli) and change to your _influx-cli_ directory.
+Grafana에서 실시간 시각화 대시보드를 제공
 
-   ```
-   git clone git@github.com:influxdata/influx-cli.git
-   cd influx-cli
-   ```
-   
-2. Build the CLI. The `make` and `make influx` commands write the new binary to `bin/$(GOOS)/influx`.
-   
-   ```
-   make
-   ```
-   
-### Updating openapi
+Python 기반의 경량 시스템으로, 클라우드 및 로컬 환경에서 모두 작동
 
-If you change or update your branch, you may also need to update `influx-cli/openapi` and regenerate the client code.
-`influx-cli/openapi` is a Git submodule that contains the underlying API contracts and client used by the CLI.
-We use [`OpenAPITools/openapi-generator`](https://github.com/OpenAPITools/openapi-generator) to generate
-the HTTP client.
+디렉토리 구조
+bpf-anomaly-detector/
+├── simulate_writer.py # 정상/이상 명령어를 시뮬레이션하여 전송
+├── main.py # 실시간 audit 로그를 분석하여 탐지
+├── ml_detector.py # 머신러닝 모델 훈련 및 예측
+├── influx_writer.py # InfluxDB에 로그 전송
+├── train_example.py # 예제 학습 코드
+├── requirements.txt # Python 의존성 목록
+└── README.md # 프로젝트 설명서 (한글)
 
-To update, run the following commands in your `influx-cli` repo:
+설치 방법
 
-1. Update the _openapi_ Git submodule. The following command pulls the latest commits for the branch and all submodules.
+Python 패키지 설치
+pip install -r requirements.txt
 
-   `git pull --recurse-submodules`
-   
-2. With [Docker](https://docs.docker.com/get-docker/) running locally, regenerate _openapi_.
+auditd 설정
+sudo apt install auditd
+sudo auditctl -a always,exit -F arch=b64 -S execve
 
-   `make openapi`
-   
-3. Rebuild the CLI
+머신러닝 모델 학습
+python3 train_example.py
 
-   `make`
- 
-## Running the CLI
+명령어 시뮬레이션 실행
+python3 simulate_writer.py
 
-After building, use `influx -h` to see the list of available commands.
+simulate_writer.py는 정상 명령어와 이상 명령어를 혼합하여 무작위 전송
 
-### Enabling Completions
+ml_detector.predict() 함수는 명령어의 비정상 여부를 판단하여 0(정상) 또는 1(이상)로 InfluxDB에 기록
 
-The CLI supports generating completions for `bash`, `zsh`, and `powershell`. To enable completions for a
-single shell session, run one of these commands:
-```
-# For bash:
-source <(influx completion bash)
-# For zsh:
-source <(influx completion zsh)
-# For pwsh:
-Invoke-Expression ((influx completion powershell) -join "`n`")
-```
-To enable completions across sessions, add the appropriate line to your shell's login profile (i.e. `~/.bash_profile`).
+실시간 로그 탐지 실행
+python3 main.py
 
-## Testing
+audit 로그를 실시간으로 읽고, 실행된 명령어 분석
 
-Run `make test` to run unit tests.
+📊 Grafana 시각화
+
+InfluxDB와 Grafana 연동
+
+다음 쿼리를 활용해 시각화
+
+from(bucket: "bpf_detect")
+|> range(start: -5m)
+|> filter(fn: (r) => r._measurement == "anomaly_detection")
+|> filter(fn: (r) => r._field == "is_anomaly")
+
+is_anomaly가 1이면 이상행위, 0이면 정상행위
+
+관련 기술
+
+auditd - Linux 커널 이벤트 로깅
+InfluxDB - 시계열 데이터베이스
+Grafana - 시각화 대시보드
+Python - 전체 로직 구현
+GitHub Actions - 자동화 및 테스트 
