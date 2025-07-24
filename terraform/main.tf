@@ -87,14 +87,3 @@ resource "aws_instance" "monitoring_ec2" {
               apt install -y python3-pip htop unzip curl
               EOF
 }
-
-resource "null_resource" "start_instance" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "aws ec2 start-instances --region ap-northeast-2 --instance-ids i-014b27daf66b94420"
-  }
-}
-
