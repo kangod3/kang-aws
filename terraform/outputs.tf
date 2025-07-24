@@ -1,9 +1,7 @@
 output "instance_id" {
-  description = "The ID of the EC2 instance"
-  value       = aws_instance.bpf_detector.id
+  value = aws_instance.monitoring_ec2.id
 }
 
 output "public_ip" {
-  description = "Public IP address of the instance"
-  value       = aws_instance.bpf_detector.public_ip
+  value = aws_instance.monitoring_ec2.public_ip
 }
