@@ -94,7 +94,7 @@ resource "null_resource" "start_instance" {
   }
 
   provisioner "local-exec" {
-    command = "aws ec2 start-instances --instance-ids i-014b27daf66b94420"
+    command = "aws ec2 start-instances --region ap-northeast-2 --instance-ids i-014b27daf66b94420"
   }
 }
 
