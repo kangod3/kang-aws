@@ -1,0 +1,38 @@
+name: Deploy BPF System
+
+on:
+  workflow_run:
+    workflows: ["Terraform AWS Deploy"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Decode PEM Key
+      run: |
+        echo "${{ secrets.AWS_PEM_BASE64 }}" | base64 -d > key.pem
+        chmod 400 key.pem
+
+    - name: Get Terraform Output (EC2 IP)
+      id: get_ip
+      run: |
+        cd terraform
+        echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
+    - name: Upload setup.sh to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no -i key.pem scripts/setup.sh ubuntu@$EC2_IP:~
+
+    - name: Run setup.sh on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$EC2_IP << 'EOF'
+          chmod +x setup.sh
+          ./setup.sh
+        EOF
