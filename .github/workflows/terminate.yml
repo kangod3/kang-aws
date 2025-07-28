@@ -1,5 +1,3 @@
-name: Terminate BPF App
-
 on:
   workflow_dispatch:
 
@@ -16,11 +14,17 @@ jobs:
         echo "${{ secrets.AWS_PEM_BASE64 }}" | base64 -d > key.pem
         chmod 400 key.pem
 
+    - name: Terraform Init
+      run: terraform init
+      working-directory: terraform
+
     - name: Get Terraform Output (EC2 IP)
       id: get_ip
       run: |
         cd terraform
-        echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+        ip=$(terraform output -raw public_ip)
+        echo "EC2_IP=$ip" >> $GITHUB_ENV
+        echo "::notice::EC2 IP is $ip"
 
     - name: Kill Python Processes on EC2
       run: |
