@@ -12,3 +12,4 @@ mv model.pkl ~/bpf-app/
 # 3. 실행
 cd ~/bpf-app
 nohup python3 main.py > output.log 2>&1 &
+nohup python3 anomaly_detect.py > anomaly.log 2>&1 &
