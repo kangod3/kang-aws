@@ -38,8 +38,8 @@ jobs:
 
     - name: Get Terraform Output (EC2 IP)
       id: get_ip
+      working-directory: terraform
       run: |
-        cd terraform
         echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
 
     - name: Decode PEM Key
