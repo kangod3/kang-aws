@@ -114,8 +114,9 @@ jobs:
     
           mkdir -p ~/bpf-app
         EOF
+        
     - name: Upload Terraform State File
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: terraform-state
         path: terraform/terraform.tfstate
