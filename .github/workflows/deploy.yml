@@ -23,8 +23,29 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      
+    - name: Get Latest Run ID of Terraform AWS Deploy
+      id: get_run_id
+      run: |
+        run_id=$(gh run list \
+          --workflow="Terraform AWS Deploy" \
+          --branch=main \
+          --limit=1 \
+          --json databaseId \
+          --jq '.[0].databaseId')
+        echo "LATEST_RUN_ID=$run_id" >> $GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Download Terraform State File
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-state
+        path: terraform/
+        run-id: ${{ env.LATEST_RUN_ID }}
+        repository: ${{ github.repository }}
+      
     - name: Decode PEM Key
       run: |
         echo "${{ secrets.AWS_PEM_BASE64 }}" | base64 -d > key.pem
@@ -34,12 +55,6 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.5.5
-        
-    - name: Download Terraform State File
-      uses: actions/download-artifact@v4
-      with:
-        name: terraform-state
-        path: terraform/
         
     - name: Terraform Init
       run: terraform init
