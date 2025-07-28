@@ -32,6 +32,10 @@ jobs:
       with:
         terraform_version: 1.5.5
         
+    - name: Terraform Init
+      run: terraform init
+      working-directory: terraform    
+      
     - name: Get Terraform Output (EC2 IP)
       id: get_ip
       run: |
