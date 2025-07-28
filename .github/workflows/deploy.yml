@@ -32,6 +32,12 @@ jobs:
       with:
         terraform_version: 1.5.5
         
+    - name: Download Terraform State File
+      uses: actions/download-artifact@v3
+      with:
+        name: terraform-state
+        path: terraform/
+        
     - name: Terraform Init
       run: terraform init
       working-directory: terraform    
