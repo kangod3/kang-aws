@@ -5,6 +5,11 @@ on:
     workflows: ["Terraform AWS Deploy"]
     types:
       - completed
+  push:
+    branches:
+      - main
+    paths:
+      - '*.py'
   workflow_dispatch:
 
 jobs:
