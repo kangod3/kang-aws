@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - '*.py'
+      - 'model.pkl'
   workflow_dispatch:
 
 jobs:
@@ -30,6 +31,7 @@ jobs:
       run: |
         cd terraform
         echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+        echo "🌐 Grafana 주소: http://$(terraform output -raw public_ip):3000"
 
     - name: Upload setup.sh to EC2
       run: |
