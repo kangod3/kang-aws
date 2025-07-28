@@ -53,19 +53,44 @@ jobs:
           set -e
           sudo apt update
           sudo apt install -y wget curl gnupg2 software-properties-common
-
-          wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg
-          echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/influxdata.list
-
+    
+          # InfluxDB GPG 키 추가
+          wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | \
+            sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/ubuntu \$(lsb_release -cs) stable" | \
+            sudo tee /etc/apt/sources.list.d/influxdata.list
+    
           sudo apt update
           sudo apt install -y influxdb2 grafana python3-pip
-          sudo systemctl enable --now influxdb
-          sudo systemctl enable --now grafana-server
-
-          influx setup --bucket bpf-bucket --org bpf-org --username admin --password admin123 --token my-super-token --force
-
+    
+          # InfluxDB 서비스 이름 확인 후 활성화
+          sudo systemctl enable influxdb
+          sudo systemctl start influxdb
+    
+          # 서비스가 완전히 뜰 때까지 대기
+          sleep 5
+          until curl -s http://localhost:8086/health | grep -q '"status":"pass"'; do
+            echo "Waiting for InfluxDB to be ready..."
+            sleep 2
+          done
+    
+          # InfluxDB 2.x 초기 설정
+          influx setup \
+            --bucket bpf-bucket \
+            --org bpf-org \
+            --username admin \
+            --password admin123 \
+            --token my-super-token \
+            --force
+    
+          # Grafana 서비스 시작
+          sudo systemctl enable grafana-server
+          sudo systemctl start grafana-server
+    
+          # Python 라이브러리 설치
           pip3 install --upgrade pip
           pip3 install influxdb-client scikit-learn psutil
-
+    
           mkdir -p ~/bpf-app
         EOF
+    
