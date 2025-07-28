@@ -46,6 +46,9 @@ jobs:
       run: |
         echo "${{ secrets.AWS_PEM_BASE64 }}" | base64 -d > key.pem
         chmod 400 key.pem
+        
+    - name: Wait before SSH
+      run: sleep 30
 
     - name: Install Dependencies on EC2 (InfluxDB 2.x, Grafana, Python Libs)
       run: |
