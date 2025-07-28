@@ -47,13 +47,26 @@ jobs:
         echo "${{ secrets.AWS_PEM_BASE64 }}" | base64 -d > key.pem
         chmod 400 key.pem
         
-    - name: Wait before SSH
-      run: sleep 30
+    - name: Wait for SSH to become available
+      run: |
+        echo "Waiting for EC2 to accept SSH connections..."
+        until nc -z $EC2_IP 22; do
+          echo "Still waiting for SSH on $EC2_IP..."
+          sleep 5
+        done
+        echo "SSH is now available!"
+
 
     - name: Install Dependencies on EC2 (InfluxDB 2.x, Grafana, Python Libs)
       run: |
         ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$EC2_IP << 'EOF'
           set -e
+          echo "Waiting for apt lock to be released..."
+          while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+            echo "Another apt process is running. Waiting..."
+            sleep 5
+          done
+          
           sudo apt update
           sudo apt install -y wget curl gnupg2 software-properties-common
     
