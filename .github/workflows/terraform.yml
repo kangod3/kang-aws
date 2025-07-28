@@ -75,7 +75,12 @@ jobs:
             sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg
           echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/ubuntu \$(lsb_release -cs) stable" | \
             sudo tee /etc/apt/sources.list.d/influxdata.list
-    
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://apt.grafana.com/gpg.key | gpg --dearmor | \
+              sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+            echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | \
+              sudo tee /etc/apt/sources.list.d/grafana.list
+              
           sudo apt update
           sudo apt install -y influxdb2 grafana python3-pip
     
