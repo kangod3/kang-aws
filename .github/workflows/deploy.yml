@@ -25,18 +25,18 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
       
-    - name: Get Latest Run ID of Terraform AWS Deploy
+    - name: Get Latest Valid Run ID
       id: get_run_id
       run: |
         run_id=$(gh run list \
           --workflow="Terraform AWS Deploy" \
-          --limit=1 \
-          --json databaseId \
-          --jq '.[0].databaseId')
+          --json name,conclusion,databaseId \
+          --jq '[.[] | select(.conclusion == "success")] | .[0].databaseId')
         echo "LATEST_RUN_ID=$run_id" >> $GITHUB_ENV
-        echo "Latest Terraform AWS Deploy run_id = $run_id"
+        echo "Found run ID: $run_id"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: Download Terraform State File
       uses: actions/download-artifact@v4
