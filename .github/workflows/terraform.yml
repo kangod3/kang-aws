@@ -59,7 +59,7 @@ jobs:
 
     - name: Install Dependencies on EC2 (InfluxDB 2.x, Grafana, Python Libs)
       run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$EC2_IP << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$EC2_IP << EOF
           set -e
           echo "Waiting for apt lock to be released..."
           while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
