@@ -80,9 +80,9 @@ jobs:
       run: |
         sed -i 's/\r$//' scripts/setup.sh
         
-    - name: Upload setup.sh to EC2
+    - name: Upload setup.sh and scripts to EC2
       run: |
-        scp -o StrictHostKeyChecking=no -i key.pem scripts/setup.sh ubuntu@$EC2_IP:~
+        scp -o StrictHostKeyChecking=no -i key.pem scripts/setup.sh *.py model.pkl ubuntu@$EC2_IP:~
 
     - name: Run setup.sh on EC2
       run: |
