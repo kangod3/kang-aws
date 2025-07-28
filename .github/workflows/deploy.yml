@@ -36,7 +36,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: terraform-state
-        path: terraform/
+        destination: terraform/
         
     - name: Terraform Init
       run: terraform init
