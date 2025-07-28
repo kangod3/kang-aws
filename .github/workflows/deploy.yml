@@ -75,7 +75,11 @@ jobs:
         echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
         echo "🌐 Grafana 주소: http://$(terraform output -raw public_ip):3000"
       working-directory: terraform
-
+      
+    - name: Fix Windows line endings in setup.sh
+      run: |
+        sed -i 's/\r$//' scripts/setup.sh
+        
     - name: Upload setup.sh to EC2
       run: |
         scp -o StrictHostKeyChecking=no -i key.pem scripts/setup.sh ubuntu@$EC2_IP:~
