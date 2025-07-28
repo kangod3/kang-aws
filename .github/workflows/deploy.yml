@@ -32,11 +32,16 @@ jobs:
           --workflow="Terraform AWS Deploy" \
           --json name,conclusion,databaseId \
           --jq '[.[] | select(.conclusion == "success")] | .[0].databaseId')
+    
         echo "LATEST_RUN_ID=$run_id" >> $GITHUB_ENV
-        echo "Found run ID: $run_id"
+        echo "::notice::Found Terraform AWS Deploy run ID: $run_id"
+    
+        if [ -z "$run_id" ]; then
+          echo "::error::No valid run_id found!"
+          exit 1
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
     - name: Download Terraform State File
       uses: actions/download-artifact@v4
